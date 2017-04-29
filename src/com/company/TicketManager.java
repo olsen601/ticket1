@@ -6,13 +6,15 @@ import java.util.LinkedList;
 public class TicketManager {
 
     LinkedList<Ticket> ticketQueue = new LinkedList<Ticket>();
+    LinkedList<Ticket> ticketResultList;
+    LinkedList<Ticket> ticketsResolved = new LinkedList<Ticket>();
 
     private void mainMenu() {
 
         while (true) {
 
             //TODO problem 4 - add two new options: Delete by Issue and Search by Issue
-            System.out.println("1. Enter Ticket\n2. Delete Ticket by ID\n3. Display All Tickets\n4. Quit");
+            System.out.println("1. Enter Ticket\n2. Delete Ticket by ID\n3. Delete Ticket by Issue\n4. Search by Issue\n5. Display All Tickets\n6. Quit");
 
             int task = Input.getPositiveIntInput("Enter your selection");
 
@@ -23,9 +25,15 @@ public class TicketManager {
                 deleteTicketById();
             }
             else if (task == 3) {
+                deleteTicketByIssue();
+            }
+            else if (task == 4) {
+                searchByIssue();
+            }
+            else if (task == 5) {
                 printAllTickets();
             }
-            else if ( task == 4 ) {
+            else if ( task == 6 ) {
                 System.out.println("Quitting program");
                 // TODO Problem 7 save all open tickets, and today's resolved tickets, to a file
                 break;
@@ -44,13 +52,27 @@ public class TicketManager {
         // list of the tickets that contain the searchString in the description.
         // Return an empty list if there are no matching Tickets.
         // The search should be case-insensitive
+        LinkedList<Ticket> ticketResultList = new LinkedList<Ticket>();
 
-        return null;  //replace this with a return statement that returns a list
+        for (Ticket t : ticketQueue ) {
+            if(t.toString().contains(searchString)){
+                ticketResultList.add(t);
+            }
+        }
+
+        return ticketResultList;  //replace this with a return statement that returns a list
     }
 
 
     protected void searchByIssue() {
         // TODO problem 4 implement this method. Return a list of matching tickets.
+        ticketResultList = searchDescription(Input.getStringInput("Enter a seach term"));
+        System.out.println(" ------- Search tickets ----------");
+
+        for (Ticket t : ticketResultList ) {
+            System.out.println(t); // This calls the  toString method for the Ticket object.
+        }
+        System.out.println(" ------- End of ticket list ----------");
 
         // Ask user for search term
         // Use searchDescription() method to get list of matching Tickets
@@ -64,6 +86,14 @@ public class TicketManager {
         // Use searchDescription to create list of matching Tickets
         // Ask for ID of ticket to delete
         // Delete that ticket
+        ticketResultList = searchDescription(Input.getStringInput("Enter a seach term"));
+        System.out.println(" ------- Search tickets ----------");
+
+        for (Ticket t : ticketResultList ) {
+            System.out.println(t); // This calls the  toString method for the Ticket object.
+        }
+        System.out.println(" ------- End of ticket list ----------");
+        deleteTicketById();
     }
 
 
@@ -73,27 +103,33 @@ public class TicketManager {
 
         if (ticketQueue.size() == 0) {    //no tickets!
             System.out.println("No tickets to delete!\n");
-            return;
         }
 
-        int deleteID = Input.getPositiveIntInput("Enter ID of ticket to delete");
-
-        //Loop over all tickets. Delete the one with this ticket ID
         boolean found = false;
-        for (Ticket ticket : ticketQueue) {
-            if (ticket.getTicketID() == deleteID) {
-                found = true;
-                ticketQueue.remove(ticket);
-                System.out.println(String.format("Ticket %d deleted", deleteID));
-                break; //don't need the loop any more.
+
+        while(!found) {
+
+            int deleteID = Input.getPositiveIntInput("Enter ID of ticket to delete");
+
+
+            //Loop over all tickets. Delete the one with this ticket ID
+
+
+            for (Ticket ticket : ticketQueue) {
+                if (ticket.getTicketID() == deleteID) {
+                    found = true;
+                    ticketQueue.remove(ticket);
+                    ticketsResolved.add(ticket);
+                    System.out.println(String.format("Ticket %d deleted", deleteID));
+                    break; //don't need the loop any more.
+                }
+            }
+            if (!found) {
+                System.out.println("Ticket ID not found, no ticket deleted" + "\n");
             }
         }
-        if (!found) {
-            System.out.println("Ticket ID not found, no ticket deleted");
-            //TODO Problem 2 re-write this method to ask for ID again if not found
-        }
-        printAllTickets();  //print updated list
 
+        printAllTickets();  //print updated list
     }
 
 
@@ -157,8 +193,14 @@ public class TicketManager {
         for (Ticket t : ticketQueue ) {
             System.out.println(t); // This calls the  toString method for the Ticket object.
         }
-        System.out.println(" ------- End of ticket list ----------");
-
+        if(ticketsResolved.size() > 0) {
+            for (Ticket t : ticketsResolved) {
+                System.out.println("Resolved " + t); // This calls the  toString method for the Ticket object.
+            }
+            System.out.println(" ------- End of ticket list ----------");
+        } else {
+            System.out.println(" ------- End of ticket list ----------");
+        }
     }
 
 
